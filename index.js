@@ -243,14 +243,14 @@ async function run() {
           (existing) => existing.isBooked === true
         );
 
-        if (hasAcceptedAgreement) {
-          // If an agreement with the provided email already exists and has been accepted
-          return res
-            .status(406)
-            .send(
-              "Agreement already exists and has been accepted for this email"
-            );
-        }
+        // if (hasAcceptedAgreement) {
+        //   // If an agreement with the provided email already exists and has been accepted
+        //   return res
+        //     .status(406)
+        //     .send(
+        //       "Agreement already exists and has been accepted for this email"
+        //     );
+        // }
 
         const result = await agreementCollection.insertOne(data);
         res.send(result);
@@ -330,12 +330,52 @@ async function run() {
       }
     );
     //detelte member
+    // app.patch(
+    //   "/api/admin/deleteMember/:id",
+    //   verifyToken,
+    //   verifyAdmin,
+    //   async (req, res) => {
+    //     try {
+    //       const agreementCollection = client
+    //         .db("apartmentDB")
+    //         .collection("agreementData");
+    //       const id = req.params.id;
+
+    //       const query = { _id: new ObjectId(id) };
+    //       const updatedDoc = {
+    //         $set: {
+    //           role: "user",
+    //         },
+    //       };
+
+    //       const result = await userCollection.updateOne(query, updatedDoc);
+
+    //       if (result.modifiedCount > 0) {
+    //         res
+    //           .status(200)
+    //           .send({ message: "User role updated successfully." });
+    //       } else {
+    //         res.status(404).send({ message: "User not found." });
+    //       }
+    //     } catch (error) {
+    //       console.error("Error fetching Member Info:", error);
+    //       res.status(500).send("Internal Server Error");
+    //     }
+    //   }
+    // );
+
     app.patch(
       "/api/admin/deleteMember/:id",
       verifyToken,
       verifyAdmin,
       async (req, res) => {
         try {
+          // const userCollection = client
+          //   .db("apartmentDB")
+          //   .collection("userData");
+          // const agreementCollection = client
+          //   .db("apartmentDB")
+          //   .collection("agreementData");
           const id = req.params.id;
 
           const query = { _id: new ObjectId(id) };
@@ -348,18 +388,41 @@ async function run() {
           const result = await userCollection.updateOne(query, updatedDoc);
 
           if (result.modifiedCount > 0) {
-            res
-              .status(200)
-              .send({ message: "User role updated successfully." });
+            // Fetch the user data after updating the role
+            const updatedUserData = await userCollection.findOne(query);
+
+            // Check if the user data is available
+            if (updatedUserData) {
+              // Use the email from the user data to delete data from agreementCollection
+              const emailToDelete = updatedUserData.email;
+              const deleteAgreementResult =
+                await agreementCollection.deleteMany({
+                  agreementReqEmail: emailToDelete,
+                });
+
+              if (deleteAgreementResult.deletedCount > 0) {
+                res.status(200).send({
+                  message:
+                    "User role and associated data deleted successfully.",
+                });
+              } else {
+                res.status(404).send({
+                  message: "User role updated, but associated data not found.",
+                });
+              }
+            } else {
+              res.status(404).send({ message: "User not found." });
+            }
           } else {
             res.status(404).send({ message: "User not found." });
           }
         } catch (error) {
-          console.error("Error fetching Member Info:", error);
+          console.error("Error updating user role:", error);
           res.status(500).send("Internal Server Error");
         }
       }
     );
+
     // get announce data
     app.get("/api/announce", verifyToken, async (req, res) => {
       try {
