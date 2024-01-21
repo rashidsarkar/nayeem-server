@@ -13,6 +13,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://stellar-malasada-952ea2.netlify.app",
+      "https://deft-nasturtium-ec7917.netlify.app",
     ],
     credentials: true,
   })
@@ -22,8 +23,8 @@ app.use(cookieParser());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 //TODO - Change URI to Server URI
-const uri = "mongodb://127.0.0.1:27017";
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ydmxw3q.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = "mongodb://127.0.0.1:27017";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ydmxw3q.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -38,20 +39,22 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const roomsCollection = client
-      .db("apartmentDB")
+      .db("apartmentDBNayeem")
       .collection("apartmentRooms");
     const agreementCollection = client
-      .db("apartmentDB")
+      .db("apartmentDBNayeem")
       .collection("agreementData");
-    const userCollection = client.db("apartmentDB").collection("usersData");
+    const userCollection = client
+      .db("apartmentDBNayeem")
+      .collection("usersData");
     const paymentCollection = client
-      .db("apartmentDB")
+      .db("apartmentDBNayeem")
       .collection("paymentData");
     const announceCollection = client
-      .db("apartmentDB")
+      .db("apartmentDBNayeem")
       .collection("announcementsData");
     const couponCollection = client
-      .db("apartmentDB")
+      .db("apartmentDBNayeem")
       .collection("couponCollection");
 
     //!SECTION JWT api
@@ -337,7 +340,7 @@ async function run() {
     //   async (req, res) => {
     //     try {
     //       const agreementCollection = client
-    //         .db("apartmentDB")
+    //         .db("apartmentDBNayeem")
     //         .collection("agreementData");
     //       const id = req.params.id;
 
@@ -371,10 +374,10 @@ async function run() {
       async (req, res) => {
         try {
           // const userCollection = client
-          //   .db("apartmentDB")
+          //   .db("apartmentDBNayeem")
           //   .collection("userData");
           // const agreementCollection = client
-          //   .db("apartmentDB")
+          //   .db("apartmentDBNayeem")
           //   .collection("agreementData");
           const id = req.params.id;
 
